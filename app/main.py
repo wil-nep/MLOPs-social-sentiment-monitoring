@@ -1,9 +1,11 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from transformers import pipeline
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI(title="Social Sentiment Monitoring API")
 
+Instrumentator().instrument(app).expose(app)
 
 class TextIn(BaseModel):
     text: str
@@ -12,7 +14,6 @@ class TextIn(BaseModel):
 class SentimentOut(BaseModel):
     label: str
     score: float
-
 
 sentiment_pipeline = pipeline(
     "sentiment-analysis",
