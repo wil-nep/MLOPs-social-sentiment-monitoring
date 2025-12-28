@@ -1,0 +1,23 @@
+# Git e venv
+.git
+.venv
+
+# Cache Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Log e file temporanei
+*.log
+
+# VS Code e tool vari
+.vscode
+.pytest_cache
+.ipynb_checkpoints
+
+# Cartelle pesanti non necessarie per runnare l'API
+training/
+data/
+notebooks/
+models/
