@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from transformers import pipeline
 from prometheus_fastapi_instrumentator import Instrumentator
+import os
 
 app = FastAPI(title="Social Sentiment Monitoring API")
 
@@ -14,9 +15,11 @@ class SentimentOut(BaseModel):
     label: str
     score: float
 
+# Load fine-tuned model if available, else use pretrained
+model_path = "model/fine_tuned_model" if os.path.exists("model/fine_tuned_model") else "cardiffnlp/twitter-roberta-base-sentiment-latest"
 sentiment_pipeline = pipeline(
     "sentiment-analysis",
-    model="cardiffnlp/twitter-roberta-base-sentiment-latest",
+    model=model_path,
 )
 
 @app.get("/health")

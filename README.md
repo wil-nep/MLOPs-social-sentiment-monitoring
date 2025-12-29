@@ -3,7 +3,18 @@
 Public demo project for monitoring a company's **online reputation** using social‑media sentiment analysis.  
 The repository implements a sentiment API, CI/CD pipeline, basic MLOps practices, and monitoring with Prometheus/Grafana.
 
-## Repository Structure (planned)
+# MLOps Social Sentiment Monitoring
+
+Public demo project for monitoring a company's **online reputation** using social‑media sentiment analysis.  
+The repository implements a sentiment API, CI/CD pipeline, basic MLOps practices, and monitoring with Prometheus/Grafana.
+
+## Prerequisites
+- Python 3.11+
+- Docker and Docker Compose
+- GitHub account for CI/CD
+- Hugging Face account for model hosting (optional)
+
+## Repository Structure
 
 - `app/`
   - FastAPI application (endpoints, models, configuration)
@@ -24,7 +35,7 @@ The repository implements a sentiment API, CI/CD pipeline, basic MLOps practices
   - `docker-compose.monitoring.yml`  – compose file for Prometheus + Grafana stack.
   - `prometheus.yml`  – Prometheus scrape configuration for the FastAPI app.
   - `requirements.txt`  – Python dependencies (API‑oriented, lightweight).
-  -  `github/workflows/`  – CI/CD pipelines (GitHub Actions).
+  -  `.github/workflows/`  – CI/CD pipelines (GitHub Actions).
   -  `.gitignore`  – ignore virtualenvs, caches, logs, etc.
   -  `.dockerignore`  – exclude heavy folders (training data, models, venv, etc.) from the Docker build context.
 
@@ -36,8 +47,9 @@ The repository implements a sentiment API, CI/CD pipeline, basic MLOps practices
   - Health‑check endpoint `/health` for monitoring and readiness.
   - `/metrics`  endpoint exposing Prometheus metrics from the FastAPI 
 - **Model & Data**
-  - Pretrained Hugging Face model (e.g. RoBERTa for Twitter sentiment).
-  - Support for updating the dataset and re‑training the model.
+  - Pretrained Hugging Face model (RoBERTa for Twitter sentiment), with support for fine-tuning.
+  - Dataset: TweetEval sentiment dataset for training/validation.
+  - Scripts for downloading dataset and fine-tuning the model.
   - In Docker, only lightweight API dependencies are installed; heavy model libraries are kept in the local dev       environment.
 - **Testing**
   - pytest tests for:
@@ -62,6 +74,10 @@ The repository implements a sentiment API, CI/CD pipeline, basic MLOps practices
 1. **Local development**
    - Clone the repo, create a virtual environment, install `requirements.txt`.
    - Run the FastAPI app locally (e.g. with `uvicorn`) and execute tests with `pytest`.
+1.5 **Model Training**
+   - Download the dataset: `python training/download_dataset.py`
+   - Fine-tune the model: `python training/train_model.py` (requires GPU for speed)
+   - The fine-tuned model will be saved in `model/fine_tuned_model` and used by the API.
 2. **Dockerized API service**
    - Build and run the API container from the project root using the provided  `Dockerfile`  and  `docker-compose.yml `.
 	 - Typical workflow:
@@ -86,7 +102,11 @@ The repository implements a sentiment API, CI/CD pipeline, basic MLOps practices
    - Add or update training data in the `training/` pipeline.
    - Run the training script to generate new model artifacts.
    - Commit/push changes so the CI/CD pipeline can test and redeploy the updated model.
-5. **Docker / environment limitations(Codespaces)**
+5. **Deploy to Hugging Face Spaces**
+   - Create a Space on Hugging Face (e.g., for Gradio interface).
+   - Use the CI/CD pipeline to push the model or app automatically (requires HF_TOKEN secret).
+   - Manual deploy: `huggingface-cli upload model/fine_tuned_model --repo-id your-username/your-space`
+6. **Docker / environment limitations(Codespaces)**
    - The project has been developed in a constrained environment (e.g. GitHub Codespaces with ~30 GB of disk space).
    - To avoid  `No space left on device`  errors when building the Docker image, the API container is intentionally lightweight:
      - only the minimal dependencies required to run FastAPI, expose Prometheus metrics and run integration tests are installed;
