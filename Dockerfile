@@ -10,7 +10,6 @@ RUN pip install --no-cache-dir torch==2.1.0+cpu torchvision==0.16.0+cpu torchaud
     pip install --no-cache-dir fastapi==0.115.0 uvicorn==0.30.1 pydantic==2.8.2 prometheus-fastapi-instrumentator==6.1.0 prometheus_client==0.20.0 psutil==5.9.8 numpy==1.26.4 scikit-learn==1.5.1 pandas==2.1.4 datasets==2.14.6
 
 COPY app/ ./app/
-COPY model/ ./model/
 
 EXPOSE 8000
 
