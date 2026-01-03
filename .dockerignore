@@ -1,12 +1,19 @@
 # Git e venv
 .git
 .venv
+venv
 
 # Cache Python
 __pycache__
 *.pyc
 *.pyo
 *.pyd
+
+# Training data (heavy, not needed in API container)
+training/data/
+training/__pycache__
+*.arrow
+*.parquet
 
 # Log e file temporanei
 *.log

@@ -1,116 +1,285 @@
 # MLOps Social Sentiment Monitoring
 
-Public demo project for monitoring a company's **online reputation** using social‑media sentiment analysis.  
-The repository implements a sentiment API, CI/CD pipeline, basic MLOps practices, and monitoring with Prometheus/Grafana.
+**Public demo project** for monitoring company online reputation using social media sentiment analysis with MLOps practices.
 
-# MLOps Social Sentiment Monitoring
+## 🎯 Project Overview
 
-Public demo project for monitoring a company's **online reputation** using social‑media sentiment analysis.  
-The repository implements a sentiment API, CI/CD pipeline, basic MLOps practices, and monitoring with Prometheus/Grafana.
+Automated sentiment analysis API for social media monitoring, implementing:
+- **Sentiment Analysis API** with FastAPI
+- **CI/CD Pipeline** with GitHub Actions
+- **Monitoring** with Prometheus and Grafana
+- **Containerization** with Docker
 
-## Prerequisites
+## 📋 Prerequisites
+
 - Python 3.11+
 - Docker and Docker Compose
 - GitHub account for CI/CD
-- Hugging Face account for model hosting (optional)
 
-## Repository Structure
+## 📁 Repository Structure
 
-- `app/`
-  - FastAPI application (endpoints, models, configuration)
-  - Sentiment inference code using a Hugging Face model
-- `training/`
-  - Scripts for (re)training / fine‑tuning the sentiment model
-  - Utilities for dataset loading and preprocessing
-- `tests/`
-  - pytest test suite (unit + integration tests for API and model)
-- `monitoring/`
-  - Prometheus and Grafana configuration
-  - Additional assets for observability dashboards.
-- `model/` (optional, ignored if large)
-  - Saved model weights / artifacts used in production
-- Root files
-	- `Dockerfile`  – container image for the FastAPI service.
-  - `docker-compose.yml`  – compose file for the API container.
-  - `docker-compose.monitoring.yml`  – compose file for Prometheus + Grafana stack.
-  - `prometheus.yml`  – Prometheus scrape configuration for the FastAPI app.
-  - `requirements.txt`  – Python dependencies (API‑oriented, lightweight).
-  -  `.github/workflows/`  – CI/CD pipelines (GitHub Actions).
-  -  `.gitignore`  – ignore virtualenvs, caches, logs, etc.
-  -  `.dockerignore`  – exclude heavy folders (training data, models, venv, etc.) from the Docker build context.
+```
+├── app/                    # FastAPI application
+│   ├── main.py            # API endpoints and sentiment pipeline
+│   └── __init__.py
+├── tests/                  # Pytest test suite
+│   └── test_api.py        # API and model tests
+├── training/               # Reference scripts (fine-tuning demo)
+│   ├── train_model.py
+│   └── download_dataset.py
+├── monitoring/             # Monitoring configurations
+├── .github/workflows/      # CI/CD pipeline
+│   └── ci-cd.yml
+├── Dockerfile              # API container image
+├── docker-compose.yml      # Full stack (API + monitoring)
+├── prometheus.yml          # Prometheus configuration
+├── requirements.txt        # Python dependencies
+└── README.md
+```
 
+## ✨ Main Features
 
-## Main Features
+### 🤖 Sentiment Analysis API
+- **Model**: `cardiffnlp/twitter-roberta-base-sentiment-latest` (pretrained)
+- **Endpoints**:
+  - `POST /predict` - Classify text sentiment (positive/negative/neutral)
+  - `GET /health` - Health check
+  - `GET /metrics` - Prometheus metrics
+  - `GET /docs` - Interactive API documentation
 
-- **Sentiment API**
-  - REST endpoint `/predict` to classify text as positive / negative / neutral.
-  - Health‑check endpoint `/health` for monitoring and readiness.
-  - `/metrics`  endpoint exposing Prometheus metrics from the FastAPI 
-- **Model & Data**
-  - Pretrained Hugging Face model (RoBERTa for Twitter sentiment), with support for fine-tuning.
-  - Dataset: TweetEval sentiment dataset for training/validation.
-  - Scripts for downloading dataset and fine-tuning the model.
-  - In Docker, only lightweight API dependencies are installed; heavy model libraries are kept in the local dev       environment.
-- **Testing**
-  - pytest tests for:
-    - Core utility functions (preprocessing, validation).
-    - FastAPI routes (status codes and response schema).
-    - Basic “sanity” checks on model predictions.
-- **CI/CD**
-  - GitHub Actions workflow to:
-    - Install dependencies and run pytest on every push/PR.
-    - Build Docker image for the API.
-    - Optionally deploy to a Hugging Face Space or other environment.
-- **Monitoring**
-  - Prometheus metrics exposed from the FastAPI app (`/metrics`).
-  - Grafana dashboards for:
-    - Request rate, latency, error rate.
-    - Distribution of sentiment predictions over time.
+### 🔄 CI/CD Pipeline
+- Automated testing on every push/PR
+- Docker image build and validation
+- Health endpoint verification
+- Optional Docker Hub deployment
 
-## Dockerized Service & Monitoring
+### 📊 Monitoring Stack
+- **Prometheus**: Metrics collection and storage
+- **Grafana**: Visualization dashboards
+- **Metrics tracked**:
+  - Request rate and latency
+  - Error rates
+  - Sentiment distribution over time
 
-## How This Repository Will Be Used
+### 🧪 Testing
+- pytest test suite
+- API endpoint validation
+- Model prediction sanity checks
 
-1. **Local development**
-   - Clone the repo, create a virtual environment, install `requirements.txt`.
-   - Run the FastAPI app locally (e.g. with `uvicorn`) and execute tests with `pytest`.
-1.5 **Model Training**
-   - Download the dataset: `python training/download_dataset.py`
-   - Fine-tune the model: `python training/train_model.py` (requires GPU for speed)
-   - The fine-tuned model will be saved in `model/fine_tuned_model` and used by the API.
-2. **Dockerized API service**
-   - Build and run the API container from the project root using the provided  `Dockerfile`  and  `docker-compose.yml `.
-	 - Typical workflow:
-	   - Start the API:
-	     - `docker compose up -d --build`  
-	   - Access the service:
-	     - `http://localhost:8000/health`  – health‑check endpoint.
-	     - `http://localhost:8000/docs`  – interactive API documentation.
-	     - `http://localhost:8000/metrics`  – Prometheus metrics exposed by the FastAPI app.
-	   - Stop the API:
-	     - docker compose down 
-3. **Monitoring stack (Prometheus+Grafana)**
-   - Start the monitoring stack using `docker-compose.monitoring.yml` and `prometheus.yml`.
-   - Services exposed:
-     - Prometheus at `http://localhost:9090`
-     - Grafana at `http://localhost:3000` (default admin/admin123, configurable in the compose file).
-   - Use Grafana dashboards to explore:
-     - request rate, latency and error rate;
-     - distribution of sentiment predictions over time.
-   - Stop the monitoring stack.
-4. **Model retraining**
-   - Add or update training data in the `training/` pipeline.
-   - Run the training script to generate new model artifacts.
-   - Commit/push changes so the CI/CD pipeline can test and redeploy the updated model.
-5. **Deploy to Hugging Face Spaces**
-   - Create a Space on Hugging Face (e.g., for Gradio interface).
-   - Use the CI/CD pipeline to push the model or app automatically (requires HF_TOKEN secret).
-   - Manual deploy: `huggingface-cli upload model/fine_tuned_model --repo-id your-username/your-space`
-6. **Docker / environment limitations(Codespaces)**
-   - The project has been developed in a constrained environment (e.g. GitHub Codespaces with ~30 GB of disk space).
-   - To avoid  `No space left on device`  errors when building the Docker image, the API container is intentionally lightweight:
-     - only the minimal dependencies required to run FastAPI, expose Prometheus metrics and run integration tests are installed;
-     - heavy model‑related libraries (e.g. full PyTorch + CUDA, large Transformers stacks) are not installed inside the API image and are instead used only in the local virtual environment.
-     - This design still demonstrates a complete MLOps setup (API + CI/CD + monitoring) while keeping the Docker image small enough for Codespaces; full model execution and retraining can be done on a separate machine or image with more resources. 
-  
+## 🚀 Quick Start
 
+### 1. Local Development
+
+```bash
+# Clone repository
+git clone https://github.com/wil-nep/MLOPs-social-sentiment-monitoring.git
+cd MLOPs-social-sentiment-monitoring
+
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run API locally
+uvicorn app.main:app --reload
+
+# Run tests
+pytest tests/ -v
+```
+
+Access API at:
+- Health: http://localhost:8000/health
+- Docs: http://localhost:8000/docs
+- Metrics: http://localhost:8000/metrics
+
+### 2. Docker Deployment
+
+```bash
+# Build and start all services (API + Prometheus + Grafana)
+docker compose up -d --build
+
+# Check status
+docker compose ps
+
+# View logs
+docker compose logs -f api
+
+# Stop services
+docker compose down
+```
+
+Access services:
+- **API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
+- **Prometheus**: http://localhost:9090
+- **Grafana**: http://localhost:3000 (admin/admin)
+
+### 3. API Usage Example
+
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# Predict sentiment
+curl -X POST "http://localhost:8000/predict" \
+  -H "Content-Type: application/json" \
+  -d '{"text": "This product is amazing! I love it!"}'
+
+# Response:
+# {"label": "POSITIVE", "score": 0.95}
+```
+
+Or use the interactive docs at http://localhost:8000/docs
+
+## 🔧 CI/CD Pipeline
+
+The GitHub Actions pipeline (`github/workflows/ci-cd.yml`) automatically:
+
+1. **Test Job** (on every push/PR):
+   - Installs Python 3.11
+   - Installs dependencies
+   - Runs pytest test suite
+
+2. **Build Job** (on push to main):
+   - Builds Docker image
+   - Starts container and validates health endpoint
+   - Optionally pushes to Docker Hub (requires secrets)
+
+### Required GitHub Secrets (Optional)
+
+For Docker Hub deployment:
+- `DOCKER_USERNAME` - Docker Hub username
+- `DOCKER_PASSWORD` - Docker Hub password
+
+## 📊 Monitoring Setup
+
+### Prometheus
+
+Configuration in `prometheus.yml`:
+- Scrapes metrics from FastAPI app every 15s
+- Available at http://localhost:9090
+
+### Grafana
+
+Default credentials: `admin/admin`
+
+**Recommended dashboards:**
+1. API Performance:
+   - Request rate (requests/sec)
+   - Response time percentiles (p50, p95, p99)
+   - Error rate
+
+2. Sentiment Analysis:
+   - Sentiment distribution (positive/negative/neutral)
+   - Prediction confidence scores
+   - Processing time per request
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+pytest tests/ -v
+
+# Run with coverage
+pytest tests/ --cov=app --cov-report=html
+
+# Run specific test
+pytest tests/test_api.py::test_health_check -v
+```
+
+Test coverage includes:
+- API endpoint responses
+- Request/response schemas
+- Model prediction validation
+- Error handling
+
+## 📚 Model Information
+
+**Pretrained Model**: `cardiffnlp/twitter-roberta-base-sentiment-latest`
+
+- **Architecture**: RoBERTa (Robustly Optimized BERT)
+- **Training Data**: Twitter/social media posts
+- **Classes**: POSITIVE, NEGATIVE, NEUTRAL
+- **Performance**: ~70-75% accuracy on social media sentiment
+- **Advantages**: 
+  - Pre-trained on Twitter data (ideal for social media)
+  - No fine-tuning required
+  - Fast inference
+  - Maintained by Cardiff NLP
+
+## 🔄 Future Improvements
+
+The `training/` directory contains reference scripts for:
+- Dataset download (TweetEval)
+- Fine-tuning the model
+- Custom training pipelines
+
+Note: Current implementation uses pretrained model as per project requirements.
+
+## 🐛 Troubleshooting
+
+### Docker Issues
+
+```bash
+# Clean Docker cache
+docker system prune -a -f
+
+# Check container logs
+docker compose logs api
+
+# Restart services
+docker compose restart
+```
+
+### API Not Loading Model
+
+The first request may take 10-15 seconds as the model downloads from Hugging Face.
+Subsequent requests will be fast (model is cached).
+
+### Space Issues (Codespaces)
+
+```bash
+# Check disk usage
+df -h
+
+# Clean Docker
+docker system prune -a -f --volumes
+
+# Remove old images
+docker image prune -a -f
+```
+
+## 📝 Project Requirements
+
+This project fulfills the following MLOps requirements:
+
+✅ **Phase 1**: Sentiment analysis model (pretrained FastText/RoBERTa)  
+✅ **Phase 2**: CI/CD pipeline with automated testing and deployment  
+✅ **Phase 3**: Monitoring system with Prometheus and Grafana  
+✅ **Documentation**: Comprehensive README and inline code comments  
+✅ **Repository**: Public GitHub repository with clean structure  
+
+## 👥 Contributing
+
+This is a demo project for educational purposes. Contributions are welcome:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## 📄 License
+
+This project is open source and available under the MIT License.
+
+## 🔗 Links
+
+- **Model**: [cardiffnlp/twitter-roberta-base-sentiment-latest](https://huggingface.co/cardiffnlp/twitter-roberta-base-sentiment-latest)
+- **Dataset** (reference): [TweetEval](https://huggingface.co/datasets/tweet_eval)
+- **Repository**: [GitHub](https://github.com/wil-nep/MLOPs-social-sentiment-monitoring)
+
+---
+
+**Built with**: FastAPI • Transformers • Docker • Prometheus • Grafana • GitHub Actions
