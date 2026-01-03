@@ -14,11 +14,17 @@ class SentimentOut(BaseModel):
     label: str
     score: float
 
-# Load pretrained model
-sentiment_pipeline = pipeline(
-    "sentiment-analysis",
-    model="cardiffnlp/twitter-roberta-base-sentiment-latest"
-)
+# Lazy load model on first use
+sentiment_pipeline = None
+
+def get_sentiment_pipeline():
+    global sentiment_pipeline
+    if sentiment_pipeline is None:
+        sentiment_pipeline = pipeline(
+            "sentiment-analysis",
+            model="cardiffnlp/twitter-roberta-base-sentiment-latest"
+        )
+    return sentiment_pipeline
 
 @app.get("/health")
 def health_check():
@@ -26,5 +32,6 @@ def health_check():
 
 @app.post("/predict", response_model=SentimentOut)
 def predict_sentiment(payload: TextIn):
-    result = sentiment_pipeline(payload.text)[0]
+    pipeline_instance = get_sentiment_pipeline()
+    result = pipeline_instance(payload.text)[0]
     return SentimentOut(label=result["label"], score=float(result["score"]))

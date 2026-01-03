@@ -4,6 +4,8 @@ services:
     build: .
     ports:
       - "8000:8000"
+    volumes:
+      - huggingface-cache:/root/.cache/huggingface
     networks:
       - monitoring
 
@@ -37,3 +39,4 @@ networks:
 
 volumes:
   grafana-storage:
+  huggingface-cache:
