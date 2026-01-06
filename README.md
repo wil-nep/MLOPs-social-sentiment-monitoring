@@ -5,9 +5,10 @@ Automated sentiment analysis API for social media monitoring with MLOps practice
 ## 🎯 Features
 
 - **Sentiment Analysis API** (FastAPI) with pretrained RoBERTa model
+- **Automatic Model Retraining** - fine-tuning, validation, and metrics tracking
 - **CI/CD Pipeline** (GitHub Actions) - automated testing & deployment
 - **Monitoring Stack** (Prometheus + Grafana)
-- **Docker** containerization
+- **Docker** containerization with HuggingFace cache persistence
 
 ## 📋 Prerequisites
 
@@ -54,17 +55,40 @@ curl -X POST http://localhost:8000/predict \
 ```
 ├── app/              # FastAPI application
 ├── tests/            # pytest suite
+├── training/         # Model training & fine-tuning
 ├── monitoring/       # Prometheus + Grafana configs
 ├── .github/          # CI/CD pipeline
+├── TRAINING.md       # Training guide
+├── MONITORING.md     # Monitoring setup
 └── docker-compose.yml
 ```
 
-## 🔧 CI/CD Pipeline
+## 🔧 Training & Fine-Tuning
 
-GitHub Actions automatically:
-- Runs tests on every push/PR
-- Builds and validates Docker image
-- Optionally pushes to Docker Hub (requires `DOCKER_USERNAME` & `DOCKER_PASSWORD` secrets)
+Fully implemented model retraining system:
+
+```bash
+# Download datasets and cache pretrained model
+python training/download_dataset.py
+
+# Fine-tune model on sentiment data
+python training/train_model.py
+
+# Validate model performance
+python training/train_model.py validate
+
+# Resume training from checkpoint
+python training/train_model.py resume
+```
+
+**Features:**
+- ✅ Automatic dataset loading (Tweet Eval + fallback to synthetic data)
+- ✅ Fine-tuning with early stopping
+- ✅ Comprehensive metrics (accuracy, F1, precision, recall)
+- ✅ Checkpoint management
+- ✅ Metrics logging (`metrics/training_metrics.json`)
+
+See [TRAINING.md](TRAINING.md) for detailed guide.
 
 ## 📊 Monitoring
 
@@ -73,6 +97,18 @@ GitHub Actions automatically:
 - Request rate & latency
 - Sentiment distribution
 - Error rates
+- Model performance metrics
+
+Setup includes both combined (`docker-compose.yml`) and standalone (`monitoring/docker-compose.monitoring.yml`) configurations.
+
+See [MONITORING.md](MONITORING.md) for detailed setup.
+
+## 🔄 CI/CD Pipeline
+
+GitHub Actions automatically:
+- Runs tests on every push/PR
+- Builds and validates Docker image
+- Optionally pushes to Docker Hub (requires `DOCKER_USERNAME` & `DOCKER_PASSWORD` secrets)
 
 ## 🧪 Testing
 
@@ -83,10 +119,10 @@ pytest tests/ --cov=app --cov-report=html # With coverage
 
 ## 📚 Model
 
-**Model**: `cardiffnlp/twitter-roberta-base-sentiment-latest`  
+**Base Model**: `cardiffnlp/twitter-roberta-base-sentiment-latest`  
 **Type**: Pretrained RoBERTa for Twitter sentiment  
 **Classes**: POSITIVE, NEGATIVE, NEUTRAL  
-**Performance**: ~70-75% accuracy on social media text
+**Fine-tuning**: Automatic on real sentiment datasets  
 
 ## 🐛 Troubleshooting
 
@@ -98,7 +134,24 @@ docker system prune -a -f
 docker compose logs api
 
 # First API call may take 10-15s (model download)
+# HuggingFace cache volume prevents re-downloads
+
+# Check training status
+tail -f metrics/training_metrics.json
 ```
+
+## 📝 Configuration
+
+### Training Config (training/train_model.py)
+- `BATCH_SIZE`: 16
+- `EPOCHS`: 3
+- `LEARNING_RATE`: 2e-5
+- `EARLY_STOPPING_PATIENCE`: 2
+
+### Docker Volumes
+- `huggingface-cache`: Persistent model cache (~600MB)
+- `prometheus_data`: Prometheus metrics
+- `grafana_data`: Grafana dashboards & configs
 
 ## 📝 Requirements Met
 

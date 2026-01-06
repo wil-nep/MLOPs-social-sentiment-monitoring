@@ -12,3 +12,8 @@ torch==2.1.0
 numpy==1.26.4
 scikit-learn==1.5.1
 pandas==2.1.4
+# Training and validation
+scipy==1.13.1
+# Development and testing
+pytest==7.4.4
+python-dotenv==1.0.1
